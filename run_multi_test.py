@@ -4,6 +4,7 @@ import argparse
 import os
 
 import docker
+import version
 
 
 if __name__ == '__main__':
@@ -29,7 +30,13 @@ if __name__ == '__main__':
         '--gpu-id', type=int,
         help='GPU ID you want to use mainly in the script.')
     parser.add_argument('--interactive', action='store_true')
+    parser.add_argument(
+        '--clone-cupy', action='store_true',
+        help='clone cupy repository based on chainer version.')
     args = parser.parse_args()
+
+    if args.clone_cupy:
+        version.clone_cupy()
 
     conf = {
         'base': args.base,
