@@ -10,6 +10,8 @@ import version
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Test script for multi-environment')
+    parser.add_argument('--test', choices=['chainer', 'cupy'],
+                        default='chainer')
     parser.add_argument('--base', choices=docker.base_choices, required=True)
     parser.add_argument('--cuda', choices=docker.cuda_choices, required=True)
     parser.add_argument('--cudnn', choices=docker.cudnn_choices, required=True)
@@ -118,11 +120,17 @@ if __name__ == '__main__':
         env['CUPY_CACHE_DIR'] = os.path.join(args.cache, '.cupy')
         env['CCACHE_DIR'] = os.path.join(args.cache, '.ccache')
 
-    if args.type == 'cpu':
-        script = './test_cpu.sh'
-    elif args.type == 'gpu':
-        script = './test.sh'
-        conf['requires'].append('cupy')
+    if args.test == 'chainer':
+        if args.type == 'cpu':
+            script = './test_cpu.sh'
+        elif args.type == 'gpu':
+            script = './test.sh'
+            conf['requires'].append('cupy')
+    elif args.test == 'cupy':
+        assert args.type == 'gpu'
+        script = './test_cupy.sh'
+    else:
+        raise RuntimeError('invalid test name: {}'.format(args.test))
 
     if args.http_proxy:
         conf['http_proxy'] = args.http_proxy
