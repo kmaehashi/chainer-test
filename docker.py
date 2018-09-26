@@ -170,34 +170,33 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 '''
 
-ubuntu_pyenv_base = '''FROM ubuntu:{ubuntu_ver}
+ubuntu14_pyenv_base = '''FROM ubuntu:14.04
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ gfortran git libhdf5-dev autoconf xz-utils && \\
     apt-get -y install libbz2-dev libreadline-dev libffi-dev libssl-dev make && \\
     apt-get clean
+'''
 
-{pyenv}
+ubuntu16_pyenv_base = '''FROM ubuntu:16.04
+RUN apt-get -y update && \\
+    apt-get -y upgrade && \\
+    apt-get -y install curl g++ g++-4.8 gfortran git autoconf libhdf5-dev libhdf5-serial-dev pkg-config && \\
+    apt-get -y install libbz2-dev libreadline-dev libffi-dev libssl-dev make && \\
+    apt-get clean
+
+RUN ln -s /usr/bin/gcc-4.8 /usr/local/bin/gcc
+RUN ln -s /usr/bin/g++-4.8 /usr/local/bin/g++
 '''
 
 base = 'ubuntu14_py35-pyenv'
-codes[base] = ubuntu_pyenv_base.format(
-    ubuntu_ver='14.04',
-    pyenv=pyenv_for(base),
-)
+codes[base] = ubuntu14_pyenv_base + pyenv_for(base)
 
 base = 'ubuntu14_py36-pyenv'
-codes[base] = ubuntu_pyenv_base.format(
-    ubuntu_ver='14.04',
-    pyenv=pyenv_for(base),
-)
+codes[base] = ubuntu14_pyenv_base + pyenv_for(base)
 
 base = 'ubuntu16_py36-pyenv'
-codes[base] = ubuntu_pyenv_base.format(
-    ubuntu_ver='16.04',
-    pyenv=pyenv_for(base),
-)
-
+codes[base] = ubuntu16_pyenv_base + pyenv_for(base)
 
 base = 'ubuntu16_py27'
 codes[base] = '''FROM ubuntu:16.04
