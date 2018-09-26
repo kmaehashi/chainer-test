@@ -108,9 +108,6 @@ codes = {}
 # base
 
 codes['centos7_py27'] = '''FROM centos:7
-
-ENV PATH /usr/lib64/ccache:$PATH
-
 RUN yum -y update && \\
     yum -y install epel-release && \\
     yum -y install gcc gcc-c++ git kmod hdf5-devel perl make autoconf xz && \\
@@ -119,9 +116,6 @@ RUN yum -y update && \\
 '''
 
 codes['centos7_py34-pyenv'] = '''FROM centos:7
-
-ENV PATH /usr/lib64/ccache:$PATH
-
 RUN yum -y update && \\
     yum -y install epel-release && \\
     yum -y install gcc gcc-c++ git kmod hdf5-devel perl make autoconf xz && \\
@@ -140,9 +134,6 @@ RUN pyenv rehash
 '''
 
 codes['centos6_py27-pyenv'] = '''FROM centos:6
-
-ENV PATH /usr/lib64/ccache:$PATH
-
 RUN yum -y update && \\
     yum -y install epel-release && \\
     yum -y install gcc gcc-c++ git kmod hdf5-devel patch perl make autoconf && \\
@@ -161,9 +152,6 @@ RUN pyenv rehash
 '''
 
 codes['ubuntu14_py27'] = '''FROM ubuntu:14.04
-
-ENV PATH /usr/lib/ccache:$PATH
-
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ gfortran git libhdf5-dev autoconf xz-utils && \\
@@ -173,9 +161,6 @@ RUN apt-get -y update && \\
 '''
 
 codes['ubuntu14_py34'] = '''FROM ubuntu:14.04
-
-ENV PATH /usr/lib/ccache:$PATH
-
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ gfortran git libhdf5-dev autoconf xz-utils && \\
@@ -187,9 +172,6 @@ RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 '''
 
 ubuntu_pyenv_base = '''FROM ubuntu:{ubuntu_ver}
-
-ENV PATH /usr/lib/ccache:$PATH
-
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ gfortran git libhdf5-dev autoconf xz-utils && \\
@@ -224,9 +206,6 @@ codes['ubuntu16_py36-pyenv'] = ubuntu_pyenv_base.format(
 )
 
 codes['ubuntu16_py27'] = '''FROM ubuntu:16.04
-
-ENV PATH /usr/lib/ccache:$PATH
-
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ g++-4.8 gfortran git autoconf libhdf5-dev libhdf5-serial-dev pkg-config && \\
@@ -238,9 +217,6 @@ RUN ln -s /usr/bin/g++-4.8 /usr/local/bin/g++
 '''
 
 codes['ubuntu16_py35'] = '''FROM ubuntu:16.04
-
-ENV PATH /usr/lib/ccache:$PATH
-
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ g++-4.8 gfortran git libhdf5-dev libhdf5-serial-dev pkg-config autoconf && \\
@@ -270,6 +246,7 @@ RUN curl -L -s -o ccache.tar.gz https://github.com/ccache/ccache/archive/v3.4.2.
     ln -s /usr/bin/ccache x86_64-linux-gnu-g++ && \\
     ln -s /usr/bin/ccache x86_64-redhat-linux-gcc && \\
     ln -s /usr/bin/ccache x86_64-redhat-linux-g++
+ENV PATH /usr/lib64/ccache:$PATH
 ENV NVCC="ccache nvcc"
 '''
 
