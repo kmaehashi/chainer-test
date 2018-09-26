@@ -107,7 +107,22 @@ codes = {}
 
 # base
 
-codes['centos7_py27'] = '''FROM centos:7
+def pyenv_for(base):
+    py_ver = '.'.join([str(x) for x in get_python_version(base))
+    return '''
+RUN git clone git://github.com/yyuu/pyenv.git /opt/pyenv
+ENV PYENV_ROOT=/opt/pyenv
+RUN mkdir "$PYENV_ROOT/shims"
+RUN chmod o+w "$PYENV_ROOT/shims"
+ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+
+RUN cd "$PYENV_ROOT" && git pull && cd - && env CFLAGS="-fPIC" pyenv install {version}
+RUN pyenv global {version}
+RUN pyenv rehash
+'''.format(version=py_ver)
+
+base = 'centos7_py27'
+codes[base] = '''FROM centos:7
 RUN yum -y update && \\
     yum -y install epel-release && \\
     yum -y install gcc gcc-c++ git kmod hdf5-devel perl make autoconf xz && \\
@@ -115,43 +130,26 @@ RUN yum -y update && \\
     yum clean all
 '''
 
-codes['centos7_py34-pyenv'] = '''FROM centos:7
+base = 'centos7_py34-pyenv'
+codes[base] = '''FROM centos:7
 RUN yum -y update && \\
     yum -y install epel-release && \\
     yum -y install gcc gcc-c++ git kmod hdf5-devel perl make autoconf xz && \\
     yum -y install bzip2-devel openssl-devel readline-devel && \\
     yum clean all
+''' + pyenv_for(base)
 
-RUN git clone git://github.com/yyuu/pyenv.git /opt/pyenv
-ENV PYENV_ROOT=/opt/pyenv
-RUN mkdir "$PYENV_ROOT/shims"
-RUN chmod o+w "$PYENV_ROOT/shims"
-ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
-
-RUN cd "$PYENV_ROOT" && git pull && cd - && env CFLAGS="-fPIC" pyenv install 3.4.8
-RUN pyenv global 3.4.8
-RUN pyenv rehash
-'''
-
-codes['centos6_py27-pyenv'] = '''FROM centos:6
+base = 'centos6_py27-pyenv'
+codes[base] = '''FROM centos:6
 RUN yum -y update && \\
     yum -y install epel-release && \\
     yum -y install gcc gcc-c++ git kmod hdf5-devel patch perl make autoconf && \\
     yum -y install bzip2-devel openssl-devel readline-devel && \\
     yum clean all
+''' + pyenv_for(base)
 
-RUN git clone git://github.com/yyuu/pyenv.git /opt/pyenv
-ENV PYENV_ROOT=/opt/pyenv
-RUN mkdir "$PYENV_ROOT/shims"
-RUN chmod o+w "$PYENV_ROOT/shims"
-ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
-
-RUN cd "$PYENV_ROOT" && git pull && cd - && env CFLAGS="-fPIC" pyenv install 2.7.14
-RUN pyenv global 2.7.14
-RUN pyenv rehash
-'''
-
-codes['ubuntu14_py27'] = '''FROM ubuntu:14.04
+base = 'ubuntu14_py27'
+codes[base] = '''FROM ubuntu:14.04
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ gfortran git libhdf5-dev autoconf xz-utils && \\
@@ -160,7 +158,8 @@ RUN apt-get -y update && \\
     apt-get clean
 '''
 
-codes['ubuntu14_py34'] = '''FROM ubuntu:14.04
+base = 'ubuntu14_py34'
+codes[base] = '''FROM ubuntu:14.04
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ gfortran git libhdf5-dev autoconf xz-utils && \\
@@ -178,34 +177,30 @@ RUN apt-get -y update && \\
     apt-get -y install libbz2-dev libreadline-dev libffi-dev libssl-dev make && \\
     apt-get clean
 
-RUN git clone git://github.com/yyuu/pyenv.git /opt/pyenv
-ENV PYENV_ROOT=/opt/pyenv
-RUN mkdir "$PYENV_ROOT/shims"
-RUN chmod o+w "$PYENV_ROOT/shims"
-ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
-
-RUN cd "$PYENV_ROOT" && git pull && cd - && env CFLAGS="-fPIC" pyenv install {python_ver}
-RUN pyenv global {python_ver}
-RUN pyenv rehash
+{pyenv}
 '''
 
-codes['ubuntu14_py35-pyenv'] = ubuntu_pyenv_base.format(
+base = 'ubuntu14_py35-pyenv'
+codes[base] = ubuntu_pyenv_base.format(
     ubuntu_ver='14.04',
-    python_ver='.'.join(
-        [str(x) for x in get_python_version('ubuntu14_py35-pyenv')]),
-)
-codes['ubuntu14_py36-pyenv'] = ubuntu_pyenv_base.format(
-    ubuntu_ver='14.04',
-    python_ver='.'.join(
-        [str(x) for x in get_python_version('ubuntu14_py36-pyenv')]),
-)
-codes['ubuntu16_py36-pyenv'] = ubuntu_pyenv_base.format(
-    ubuntu_ver='16.04',
-    python_ver='.'.join(
-        [str(x) for x in get_python_version('ubuntu16_py36-pyenv')]),
+    pyenv=pyenv_for(base),
 )
 
-codes['ubuntu16_py27'] = '''FROM ubuntu:16.04
+base = 'ubuntu14_py36-pyenv'
+codes[base] = ubuntu_pyenv_base.format(
+    ubuntu_ver='14.04',
+    pyenv=pyenv_for(base),
+)
+
+base = 'ubuntu16_py36-pyenv'
+codes[base] = ubuntu_pyenv_base.format(
+    ubuntu_ver='16.04',
+    pyenv=pyenv_for(base),
+)
+
+
+base = 'ubuntu16_py27'
+codes[base] = '''FROM ubuntu:16.04
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ g++-4.8 gfortran git autoconf libhdf5-dev libhdf5-serial-dev pkg-config && \\
@@ -216,7 +211,8 @@ RUN ln -s /usr/bin/gcc-4.8 /usr/local/bin/gcc
 RUN ln -s /usr/bin/g++-4.8 /usr/local/bin/g++
 '''
 
-codes['ubuntu16_py35'] = '''FROM ubuntu:16.04
+base = 'ubuntu16_py35'
+codes[base] = '''FROM ubuntu:16.04
 RUN apt-get -y update && \\
     apt-get -y upgrade && \\
     apt-get -y install curl g++ g++-4.8 gfortran git libhdf5-dev libhdf5-serial-dev pkg-config autoconf && \\
