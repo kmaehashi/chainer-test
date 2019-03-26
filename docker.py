@@ -819,6 +819,7 @@ def run_with(conf, script, no_cache=False, volume=None, env=None,
         cmd += ['timeout', str(timeout)]
     cmd.append(script)
 
+    print(cmd)
     res = subprocess.call(cmd)
     if res != 0:
         logging.error('Failed to run test')
